@@ -1,0 +1,122 @@
+"""Single source of truth for all agent states, phases, and event names."""
+from enum import Enum
+
+
+class RunState(str, Enum):
+    CREATED = "CREATED"
+    INDEXING = "INDEXING"
+    INDEXED = "INDEXED"
+    PLANNING = "PLANNING"
+    PLANNED = "PLANNED"
+    EXECUTING = "EXECUTING"
+    REPAIRING = "REPAIRING"
+    VERIFYING = "VERIFYING"
+    WAITING_FOR_APPROVAL = "WAITING_FOR_APPROVAL"
+    PAUSED = "PAUSED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+    COMPLETED = "COMPLETED"
+
+
+class Phase(str, Enum):
+    INDEXING = "INDEXING"
+    PLANNING = "PLANNING"
+    EXECUTION = "EXECUTION"
+    REPAIR = "REPAIR"
+    VERIFICATION = "VERIFICATION"
+
+
+#: Which RunState is "live" while a given phase runs.
+PHASE_ACTIVE_STATE: dict[Phase, RunState] = {
+    Phase.INDEXING: RunState.INDEXING,
+    Phase.PLANNING: RunState.PLANNING,
+    Phase.EXECUTION: RunState.EXECUTING,
+    Phase.REPAIR: RunState.REPAIRING,
+    Phase.VERIFICATION: RunState.VERIFYING,
+}
+
+PHASE_ORDER: list[Phase] = [
+    Phase.INDEXING,
+    Phase.PLANNING,
+    Phase.EXECUTION,
+    Phase.REPAIR,
+    Phase.VERIFICATION,
+]
+
+#: States from which a run can be resumed (crash / pause / rejection recovery).
+RESUMABLE_STATES: set[RunState] = {
+    RunState.PAUSED,
+    RunState.FAILED,
+    RunState.WAITING_FOR_APPROVAL,
+}
+
+#: States that mean "a worker should be driving this run right now".
+ACTIVE_STATES: set[RunState] = {
+    RunState.INDEXING,
+    RunState.INDEXED,
+    RunState.PLANNING,
+    RunState.PLANNED,
+    RunState.EXECUTING,
+    RunState.REPAIRING,
+    RunState.VERIFYING,
+}
+
+TERMINAL_STATES: set[RunState] = {RunState.COMPLETED, RunState.CANCELLED}
+
+
+class TaskStatus(str, Enum):
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    SKIPPED = "SKIPPED"
+
+
+class RunMode(str, Enum):
+    AUTO = "AUTO"
+    HITL = "HITL"
+
+
+class ApprovalGate(str, Enum):
+    BEFORE_MIGRATION = "BEFORE_MIGRATION"
+    AFTER_INDEXING = "AFTER_INDEXING"
+    AFTER_PLANNING = "AFTER_PLANNING"
+    DESTRUCTIVE_CHANGE = "DESTRUCTIVE_CHANGE"
+    DEPENDENCY_CHANGE = "DEPENDENCY_CHANGE"
+    REPAIR_EXHAUSTED = "REPAIR_EXHAUSTED"
+    BEFORE_FINALIZATION = "BEFORE_FINALIZATION"
+
+
+#: Gates that fire even in AUTO mode.
+ALWAYS_ON_GATES: set[ApprovalGate] = {ApprovalGate.REPAIR_EXHAUSTED}
+
+
+class EventType(str, Enum):
+    RUN_CREATED = "RUN_CREATED"
+    RUN_STARTED = "RUN_STARTED"
+    RUN_RESUMED = "RUN_RESUMED"
+    RUN_PAUSED = "RUN_PAUSED"
+    RUN_COMPLETED = "RUN_COMPLETED"
+    RUN_FAILED = "RUN_FAILED"
+    RUN_CANCELLED = "RUN_CANCELLED"
+    PHASE_STARTED = "PHASE_STARTED"
+    PHASE_COMPLETED = "PHASE_COMPLETED"
+    TASK_STARTED = "TASK_STARTED"
+    TASK_COMPLETED = "TASK_COMPLETED"
+    TASK_FAILED = "TASK_FAILED"
+    FILE_MODIFIED = "FILE_MODIFIED"
+    FILE_CREATED = "FILE_CREATED"
+    FILE_DELETED = "FILE_DELETED"
+    TEST_STARTED = "TEST_STARTED"
+    TEST_PASSED = "TEST_PASSED"
+    TEST_FAILED = "TEST_FAILED"
+    REPAIR_STARTED = "REPAIR_STARTED"
+    REPAIR_ATTEMPT = "REPAIR_ATTEMPT"
+    CHECKPOINT_CREATED = "CHECKPOINT_CREATED"
+    APPROVAL_REQUIRED = "APPROVAL_REQUIRED"
+    APPROVAL_GRANTED = "APPROVAL_GRANTED"
+    APPROVAL_REJECTED = "APPROVAL_REJECTED"
+    GIT_SNAPSHOT = "GIT_SNAPSHOT"
+    GIT_ROLLBACK = "GIT_ROLLBACK"
+    LLM_CALL = "LLM_CALL"
+    LOG = "LOG"
