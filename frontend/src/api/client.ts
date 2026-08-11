@@ -10,7 +10,11 @@ import type {
   TestRecord,
 } from "../types";
 
-export const api = axios.create({ baseURL: "/api" });
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+export const api = axios.create({
+  baseURL: `${API_URL}/api`,
+});
 
 export interface CreateRunPayload {
   repository_url: string;
