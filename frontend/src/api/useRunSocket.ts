@@ -26,8 +26,7 @@ export function useRunSocket(runId: string | undefined): SocketState {
     let reconnectTimer: number | undefined;
 
     const connect = () => {
-      const proto = window.location.protocol === "https:" ? "wss" : "ws";
-      ws = new WebSocket(`${proto}://${window.location.host}/ws/runs/${runId}`);
+      ws = new WebSocket(`wss://autonomous-code-migration-agent.onrender.com/ws/runs/${runId}`);
 
       ws.onopen = () => {
         setConnected(true);

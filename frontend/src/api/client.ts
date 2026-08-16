@@ -10,10 +10,8 @@ import type {
   TestRecord,
 } from "../types";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
 export const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: "/api",
 });
 
 export interface CreateRunPayload {
